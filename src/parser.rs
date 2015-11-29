@@ -15,25 +15,30 @@ pub fn one_char(c: char) -> Operation<Fn(&mut TwoWay)-> Result<(), ()>> {
 	}))
 }
 
+pub trait Func<R>: Fn(&mut TwoWay) -> R + 'static {}
+
+impl <R, T: ?Sized + Fn(&mut TwoWay) -> R + 'static> Func<R> for T {}
+
 pub trait Comment {
-	fn comment_before<R, T: ?Sized + Fn(&mut TwoWay) -> R + 'static>(&self, op: Operation<T>) -> Operation<Fn(&mut TwoWay) -> R>;
-	fn comment_after<R, T: ?Sized + Fn(&mut TwoWay) -> R + 'static>(&self, op: Operation<T>) -> Operation<Fn(&mut TwoWay) -> R>;
+	fn comment_before<R, T: ?Sized + Func<R>>(&self, Operation<T>) -> Operation<Fn(&mut TwoWay) -> R>;
+	fn comment_after<R, T: ?Sized + Func<R>>(&self, Operation<T>) -> Operation<Fn(&mut TwoWay) -> R>;
 }
 
 impl Comment for str {
-	fn comment_before<R, T: ?Sized + Fn(&mut TwoWay) -> R + 'static>(&self, op: Operation<T>) -> Operation<Fn(&mut TwoWay) -> R> {
+	fn comment_before<R, T: ?Sized + Func<R>>(&self, op: Operation<T>) -> Operation<Fn(&mut TwoWay) -> R> {
 		let c = self.to_string();
 		let a = move || println!("{}", c);
 		before(op, a)
 	}
-	fn comment_after<R, T: ?Sized + Fn(&mut TwoWay) -> R + 'static>(&self, op: Operation<T>) -> Operation<Fn(&mut TwoWay) -> R> {
+	
+	fn comment_after<R, T: ?Sized + Func<R>>(&self, op: Operation<T>) -> Operation<Fn(&mut TwoWay) -> R> {
 		let c = self.to_string();
 		let a = move || println!("{}", c);
 		after(op, a)
 	}
 }
 
-pub fn comment<R, T: ?Sized + Fn(&mut TwoWay) -> R + 'static>(op: Operation<T>, c: &str) -> Operation<Fn(&mut TwoWay) -> R> {
+pub fn comment<R, T: ?Sized + Func<R>>(op: Operation<T>, c: &str) -> Operation<Fn(&mut TwoWay) -> R> {
 	let c = c.to_string();
 	Operation(Box::new(move |s| {
 		println!("{}", c);
@@ -41,14 +46,14 @@ pub fn comment<R, T: ?Sized + Fn(&mut TwoWay) -> R + 'static>(op: Operation<T>, 
 	}))
 }
 
-pub fn after<Action: Fn() + 'static, R, T: ?Sized + Fn(&mut TwoWay) -> R + 'static>(op: Operation<T>, a: Action) -> Operation<Fn(&mut TwoWay) -> R> {
+pub fn after<Action: Fn() + 'static, R, T: ?Sized + Func<R>>(op: Operation<T>, a: Action) -> Operation<Fn(&mut TwoWay) -> R> {
 	Operation(Box::new(move |s| {
 		a();
 		op.call(s)
 	}))
 }
 
-pub fn before<Action: Fn() + 'static, R, T: ?Sized + Fn(&mut TwoWay) -> R + 'static>(op: Operation<T>, a: Action) -> Operation<Fn(&mut TwoWay) -> R> {
+pub fn before<Action: Fn() + 'static, R, T: ?Sized + Func<R>>(op: Operation<T>, a: Action) -> Operation<Fn(&mut TwoWay) -> R> {
 	Operation(Box::new(move |s| {
 		let ret = op.call(s);
 		a();
