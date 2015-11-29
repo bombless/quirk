@@ -11,6 +11,7 @@ pub struct Node {
 	name: String
 }
 
+#[derive(Clone)]
 pub struct TwoWay {
 	ptr: usize,
 	strm: Vec<char>

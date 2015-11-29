@@ -21,26 +21,11 @@ impl<R, T: ?Sized + Fn(&mut TwoWay) -> R> Operation<T> {
 	}
 }
 
-pub fn add<P: ?Sized, Q: ?Sized, U, V, E>(lhs: Operation<P>, rhs: Operation<Q>) -> Operation<Fn(&mut TwoWay)->Result<(U, V), E>>
-	where
-		P: Fn(&mut TwoWay) -> Result<U, E> + 'static,
-		Q: Fn(&mut TwoWay) -> Result<V, E> + 'static {
-	Operation(Box::new(move |s| {
-		let ptr = s.ptr();
-		match lhs.0(s) {
-			Ok(p) => match rhs.0(s) {
-				Ok(q) => Ok((p, q)),
-				Err(e) => {
-					s.set(ptr);
-					Err(e)
-				}
-			},
-			Err(e) => {
-				s.set(ptr);
-				Err(e)
-			}
-		}
-	}))
+impl<'a, R, T: ?Sized + Fn(&'a mut TwoWay) -> R> BitOr<&'a mut TwoWay> for Operation<T> {
+	type Output = R;
+	fn bitor(self, rhs: &'a mut TwoWay) -> R {
+		self.0(rhs)
+	}
 }
 
 impl<P: ?Sized, Q: ?Sized, U, V, E> Add<Operation<Q>> for Operation<P>
