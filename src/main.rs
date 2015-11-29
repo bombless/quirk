@@ -11,6 +11,8 @@ fn main() {
     let mut from = src.clone();
     let result = empty_quote.call(&mut src);
     println!("{:?}", result);
-    let result = "something happened".comment_after(parser::one_char('"')) + parser::one_char('"').comment("parsing second quote") | &mut from;
+    let blahblah = "something happened";
+    let parsing = "parsing second quote";
+    let result = blahblah.comment_after(parser::one_char('"')) + parser::one_char('"').comment(parsing) >> () | &mut from;
     println!("{:?}", result);    
 }

@@ -113,3 +113,19 @@ impl<P: ?Sized, Q: ?Sized, U, V, E> Add<Operation<Q>> for Operation<P>
 		}))
 	}
 }
+
+pub fn ignore<Ok, Err, T: ?Sized + Func<Result<Ok, Err>>, Q: Copy + 'static>(op: Operation<T>, to: Q) -> Operation<Fn(&mut TwoWay)->Result<Q, Err>> {
+	Operation(Box::new(move |s| {
+		match op.call(s) {
+			Ok(_) => Ok(to),
+			Err(err) => Err(err)
+		}
+	}))
+}
+
+impl<Ok, Err, T: ?Sized + Fn(&mut TwoWay) -> Result<Ok, Err> + 'static, Q: Copy + 'static> Shr<Q> for Operation<T> {
+	type Output = Operation<Fn(&mut TwoWay)->Result<Q, Err>>;
+	fn shr(self, rhs: Q) -> Self::Output {
+		ignore(self, rhs)
+	}
+}
