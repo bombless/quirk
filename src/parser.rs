@@ -15,9 +15,22 @@ pub fn one_char(c: char) -> Operation<Fn(&mut TwoWay)-> Result<(), ()>> {
 	}))
 }
 
+pub fn comment<R, T: ?Sized + Fn(&mut TwoWay) -> R + 'static>(op: Operation<T>, c: &str) -> Operation<Fn(&mut TwoWay) -> R> {
+	let c = c.to_string();
+	Operation(Box::new(move |s| {
+		println!("{}", c);
+		op.call(s)
+	}))
+}
+
 impl<R, T: ?Sized + Fn(&mut TwoWay) -> R> Operation<T> {
 	pub fn call(&self, s: &mut TwoWay) -> R {
 		self.0(s)
+	}
+	
+	pub fn comment(self, c: &str) -> Operation<Fn(&mut TwoWay) -> R>
+		where T: 'static {
+		comment(self, c)
 	}
 }
 
