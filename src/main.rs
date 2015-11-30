@@ -14,5 +14,5 @@ fn main() {
     let blahblah = "something happened";
     let parsing = "parsing second quote";
     let result = blahblah.comment_after(parser::one_char('"')) + parser::one_char('"').comment(parsing) >> () | &mut from;
-    println!("{:?}", result);    
+    println!("{:?}", result);
 }
