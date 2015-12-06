@@ -74,7 +74,7 @@ pub fn take_while(op: ParseOperation<Result<(), ()>>) -> ParseOperation<Result<S
 		}
 		s.set(start_ptr);
 		let mut ret = String::new();
-		while ret.len() < end_ptr - start_ptr {
+		for _ in start_ptr .. end_ptr {
 			ret.push(s.read().unwrap())
 		}
 		s.set(end_ptr);

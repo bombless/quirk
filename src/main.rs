@@ -114,6 +114,6 @@ fn void_tag() -> parser::ParseOperation<Result<types::Node, ()>> {
 
 fn main() {
     println!("{:?}", text_node().call(&mut "abc</tag>".into()));
-    println!("{:?}", empty_node().call(&mut "<tag></tag>".into()));
+    println!("{:?}", empty_node().call(&mut "<你好哇></你好哇>".into()));
     println!("{:?}", node().call(&mut "<tag some=1 hey=1><hey/>hey</tag>".into()));
 }
